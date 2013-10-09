@@ -1,6 +1,7 @@
 import random
+import time
 
-class Deck:
+class Deck:    
     def __init__(self):
         self.cards = []
         self.acesHigh = (input("Are Aces high? (y/n) ") == "y")
@@ -12,56 +13,33 @@ class Deck:
                 for y in range(1, 14):
                     self.cards.append((x, y))
                     
-    def shuffle(self):
+    def shuffle(self, userList):
         i = 0
-        playerDeck = []
-        PCDeck = []
         while self.cards != []:
-            card = self.cards.pop(random.randint(0, 51 - i))
-            playerDeck.append(card)
-            i += 1
-            card = self.cards.pop(random.randint(0, 51 - i))
-            PCDeck.append(card)
-            i += 1
-        return playerDeck, PCDeck
-            
-    def flip_card(self, deck):
-        return deck.pop(0)
-    
-    def add(self, cardTuple):
-        self.cards.append(self.cardTuple)
-                    
+            for user in userList:
+                if self.cards != []:
+                    poppedCard = self.cards.pop(random.randint(0, 51 - i))
+                    user.Deck.append(poppedCard)
+                    i += 1
+        return
+
+        
+class Hand:
+    def __init__(self, owner):
+        self.Deck = []
+        self.Card = ()
+        self.owner = owner    
+        
+    def flip_card(self):
+        return self.Deck.pop(0)
+
 class Card:
     def __init__(self, cardTuple):
         self.cardTuple = cardTuple
         self.suit = cardTuple[0]
         self.rank = cardTuple[1]
-        
-    def compare(self, PCCard):
-        if self.rank > PCCard.rank:
-            print("\nYou are the winner!")
-            winner = "Player"
-        elif self.rank < PCCard.rank:
-            print("\nThe Computer is the winner!")
-            winner = "PC"
-        else:
-            print("\nThese cards are equal: It's a tie!")
-            time.sleep(2)
-            input("\nPress the enter key to proceed with DOUBLE WAR!")
-            winner = double_war()
     
-        if winner == "Player":
-            playerDeck.cards.append(self.cardTuple)
-            playerDeck.cards.append(PCCard.cardTuple)
-        if winner == "PC":
-            PCDeck.cards.append(PCCard.cardTuple)
-            PCDeck.cards.append(self.cardTuple)
-            
-        time.sleep(.5)
-        
-        return winner
-    
-    def name(self):
+    def __str__(self):
         
         if self.suit==1:
             suit = "Diamonds"        
@@ -141,14 +119,43 @@ class Card:
         for line in picture:
             print(line)
         
-        return        
+        return  
+    
+    def compare(self, otherCard):
+        if self.rank > otherCard.rank:
+            print("\nYou are the winner!")
+            winner = self.owner
+        elif self.rank < otherCard.rank:
+            print("\nThe Computer is the winner!")
+            winner = otherCard.owner
+        else:
+            print("\nThese cards are equal: It's a tie!")
+            time.sleep(2)
+            input("\nPress the enter key to proceed with DOUBLE WAR!")
+            winner = "Tie"
+            
+        time.sleep(.5)
+        
+        return winner        
+        
 
 Deck = Deck() #initialize deck
-playerDeck, PCDeck = Deck.shuffle() #shuffle the deck to both players
-playerCard = Card(Deck.flip_card(playerDeck))
-print(playerCard.name())
+Player, PC = Hand("Player"), Hand("PC") #initialize hands. The string will represent the name of the winner.
+Deck.shuffle([Player, PC]) #shuffle the deck to both players
+
+print(Player.Deck)
+print(PC.Deck)
+
+print(len(Player.Deck))
+print(len(PC.Deck))
+
+Player.Card = Player.flip_card()  #card1 and card2 are tuples
+PC.Card = PC.flip_card()
+
+print(playerCard)
 playerCard.draw()
-PCCard = Card(Deck.flip_card(PCDeck))
-print(PCCard.name())
+print(PCCard)
 PCCard.draw()
-print(playerCard.beats(PCCard))
+
+winner = playerCard.compare(PCCard)
+print(winner)
