@@ -37,13 +37,14 @@ class Deck:
 class Hand:
     def __init__(self, owner):
         self.Deck = []
-        self.Card = ()
+        #self.Card = ()
         # Calling .owner on a Hand will return the username as a string
-        self.owner = owner    
+        self.owner = owner
         
     def flip_card(self):
         #returns the card and the owner:  [(1,2), "Player"]
-        return [self.Deck.pop(0), self.owner]  
+        return [self.Deck.pop(0), self.owner]
+
     
 class Card:
     def __init__(self, cardList):
@@ -133,19 +134,33 @@ class Card:
         
         return      
     
-    def compare(self, otherCard):
-        if self.rank > otherCard.rank:
-            print(self.owner, "is the winner!")
-            winner = self.owner
-        elif self.rank < otherCard.rank:
-            print(otherCard.owner, "is the winner!")
-            winner = otherCard.owner
-        else:
-            print("\nThese cards are equal: It's a tie!")
-            time.sleep(2)
-            input("\nPress the enter key to proceed with DOUBLE WAR!")
-            winner = "Tie"
-            
-        time.sleep(.5)
+def card_compare(cardsUp, users): # cardsUp is a list of the card objects in play.
+
+    ranksList = []
+    for card in cardsUp:
+        ranksList.append([card.rank,card.owner])
         
-        return winner
+    ranksList.sort()
+    ranksList.reverse()
+    winner = [0] # This list can't be initialized as a blank because the first append command with store itself in the 0 index and be overwrtitten.
+    if ranksList[0][0] == ranksList[1][0]:
+        for i in range(2, len(ranksList)): #vIf there is one instance of a tie between the first two cards, find the number of ties there are.
+            winner.append([ ranksList[0][1], ranksList[1][1] ]) # Append the string representation of first two users who tied.
+            if ranksList[0][0] == ranksList[i][0]:
+                winner.append("Tie") # Append the string to the winner list so we can develop a list of winners
+            else:
+                winner[0] = i # This will set the number of tied players to the first index of winner.
+                log.debug("winner: %s", winner)
+                break # The for loop can stop if the cards aren't tying.
+        
+    else:
+        print(ranksList[0][1], "is the winner!")
+        winner = [1, ranksList[0][1]] # Winner is a list of [number of winners, "string that is the name of the winner"]
+        
+        for i in range(0, len(users)):
+            try: # keep attempting to assign the cards to every user in the list, waiting until the winner string is equal to the .owner string
+                if(users[i].owner == winner[1]):
+                    for card in cardsUp: # Make a regular (suit, rank) tuple set from the given data so we can append it.
+                        users[i].Deck.append((card.suit, card.rank))
+            except:
+                break
