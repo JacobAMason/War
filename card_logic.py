@@ -37,14 +37,13 @@ class Deck:
 class Hand:
     def __init__(self, owner):
         self.Deck = []
-        #self.Card = ()
+        self.Card = ()
         # Calling .owner on a Hand will return the username as a string
-        self.owner = owner
+        self.owner = owner    
         
     def flip_card(self):
         #returns the card and the owner:  [(1,2), "Player"]
-        return [self.Deck.pop(0), self.owner]
-
+        return [self.Deck.pop(0), self.owner]  
     
 class Card:
     def __init__(self, cardList):
@@ -134,25 +133,19 @@ class Card:
         
         return      
     
-def card_compare(cardsUp, users): # cardsUp is a list of the card objects in play.
-
-    ranksList = []
-    for card in cardsUp:
-        ranksList.append([card.rank,card.owner])
+    def compare(self, otherCard):
+        if self.rank > otherCard.rank:
+            print(self.owner, "is the winner!")
+            winner = self.owner
+        elif self.rank < otherCard.rank:
+            print(otherCard.owner, "is the winner!")
+            winner = otherCard.owner
+        else:
+            print("\nThese cards are equal: It's a tie!")
+            time.sleep(2)
+            input("\nPress the enter key to proceed with DOUBLE WAR!")
+            winner = "Tie"
+            
+        time.sleep(.5)
         
-    ranksList.sort()
-    ranksList.reverse()
-    
-    if ranksList[0][0] == ranksList[1][0]:
-        winner = "Tie"
-    else:
-        print(ranksList[0][1], "is the winner!")
-        winner = ranksList[0][1]
-        
-    for i in range(0, len(users)):
-        try:
-            if(users[i].owner == winner):
-                for card in cardsUp: # Make a regular (suit, rank) tuple set from the given data so we can append it.
-                    users[i].Deck.append((card.suit, card.rank))
-        except:
-            break 
+        return winner

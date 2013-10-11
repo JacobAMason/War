@@ -3,7 +3,7 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger(__name__)
   
-
+  
   
       
 Deck = Deck(True) #initialize deck. True means Aces are high
@@ -27,37 +27,32 @@ for userName in userNameList:
 
 Deck.shuffle(users) #shuffle the deck and deal to all players
 
-# Gameplay starts here
-while("playcontinues" == "playcontinues"): 
-    totalDeckSize = 0
+
+while("playcontinues" == "playcontinues"):
     for i in users: #i represents a single user. This loop will iterate through all users playing
         log.debug("%s: %s Cards: %s", i.owner, len(i.Deck), i.Deck)
-        totalDeckSize += len(i.Deck)
-        
-    log.debug("Total number of cards: %i", totalDeckSize)
-              
-    cardsUp = []
+    
+    card = []
     for i in range(0, len(users)):
+        log.debug("Iteration: %i", i)
         log.debug("User: %s", users[i].owner)
-        cardsUp.append( Card(users[i].flip_card()) )
-        log.debug("Card: %s", str(cardsUp[i])) 
+        card.append( Card(users[i].flip_card()) )
+        log.debug("Card: %s", str(card[i])) 
     
     for i in range(1, len(users)):
-        print(cardsUp[i], "\t", end="")
+        print(card[i], "\t", end="")
         
     print()
     for i in range(1, len(users)):
-        cardsUp[i].draw()
+        card[i].draw()
         
     print()
-    cardsUp[0].draw()
-    print(cardsUp[0])
+    card[0].draw()
+    print(card[0])
     print()
     
-    
-    card_compare(cardsUp, users)
-    
+    winner = card[0].compare(card[1])
     
     
-    print()
-    input("Press the enter key to flip. ")
+    
+    input("Press enter key to continue...")
