@@ -1,6 +1,6 @@
 from card_logic import *
 import logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
   
 
@@ -23,40 +23,37 @@ for i in range(0, PCnum):
 # every user in the list will be turned into an object of class Hand
 users = []
 for userName in userNameList:
-    users.append(Hand(userName)) #initialize hands. The string will represent the name of the winner.
+    users.append(Hand(userName)) # initialize hands. The string will represent the name of the winner.
 
 Deck.shuffle(users) #shuffle the deck and deal to all players
 
-# Gameplay starts here
-while("playcontinues" == "playcontinues"): 
+loser = "Noner" #loser is set to the loser of a round if one is eliminated.
+end_game = "None"
+
+# Gameplay starts here and continues as long as there is more than one player.
+while(len(users) > 1):
+    
     totalDeckSize = 0
     for i in users: #i represents a single user. This loop will iterate through all users playing
-        log.debug("%s: %s Cards: %s", i.owner, len(i.Deck), i.Deck)
+        log.debug("%s: %s Cards: %s", i, len(i.Deck), i.Deck)
         totalDeckSize += len(i.Deck)
-        
+        print(i, "has", len(i.Deck), "cards. ", end="")
     log.debug("Total number of cards: %i", totalDeckSize)
+    
+    print("\nPress the enter key to flip. ")
               
-    cardsUp = []
-    for i in range(0, len(users)):
-        log.debug("User: %s", users[i].owner)
-        cardsUp.append( Card(users[i].flip_card()) )
-        log.debug("Card: %s", str(cardsUp[i])) 
+    end_game, users = flip_cards(users) #flip some cards.
     
-    for i in range(1, len(users)):
-        print(cardsUp[i], "\t", end="")
-        
-    print()
-    for i in range(1, len(users)):
-        cardsUp[i].draw()
-        
-    print()
-    cardsUp[0].draw()
-    print(cardsUp[0])
+    for i in users:
+        users, loser = i.empty(1, users) #check and see if all the users can still play
+
     print()
     
-    
-    card_compare(cardsUp, users)
-    
-    
-    print()
-    input("Press the enter key to flip. ")
+# Exit While loop
+
+print()
+if loser == users[0]:
+    print("Sorry, ", users[0], ", you've lost.", sep="")
+else:
+    print("Congratulations, ", users[0], ", you've won!", sep="")
+
