@@ -1,6 +1,6 @@
 from card_logic import *
 import logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger(__name__)
   
 
@@ -8,7 +8,7 @@ log = logging.getLogger(__name__)
       
 Deck = Deck(True) #initialize deck. True means Aces are high
 userNameList = []
-while userNameList == []:
+while userNameList == []: 
     userNameList.append(input("Please enter your name: "))
     
 PCnum = int(input("How many Computer opponents would you like to compete against? "))
@@ -27,32 +27,42 @@ for userName in userNameList:
 
 Deck.shuffle(users) #shuffle the deck and deal to all players
 
-loser = "Noner" #loser is set to the loser of a round if one is eliminated.
-end_game = "None"
-
 # Gameplay starts here and continues as long as there is more than one player.
 while(len(users) > 1):
     
     totalDeckSize = 0
-    for i in users: #i represents a single user. This loop will iterate through all users playing
+    for i in users: #i represents a single user. This loop will iterate through all users playing and get the number of cards they have.
         log.debug("%s: %s Cards: %s", i, len(i.Deck), i.Deck)
         totalDeckSize += len(i.Deck)
         print(i, "has", len(i.Deck), "cards. ", end="")
     log.debug("Total number of cards: %i", totalDeckSize)
     
-    print("\nPress the enter key to flip. ")
+    commands = input("\nPress the enter key to flip. ")
+    
+    commands
               
-    end_game, users = flip_cards(users) #flip some cards.
+    winner, users = flip_cards(users) #flip some cards.
+    
+    losers = []
     
     for i in users:
-        users, loser = i.empty(1, users) #check and see if all the users can still play
+        log.debug("users (empty checker): %s", users)
+        losers = i.empty(losers) #check and see if all the users can still play
+    
+    if users[0] in losers: #if the human is among the losers, end the game now
+        break
+    else:
+        for i in losers: # if the human is not among the losers, just eject the computer from the users list
+            users.remove(losers[i])
 
     print()
     
 # Exit While loop
 
 print()
-if loser == users[0]:
+log.debug("losers: %s", losers)
+log.debug("users[0]: %s", users[0])
+if users[0] in losers:
     print("Sorry, ", users[0], ", you've lost.", sep="")
 else:
     print("Congratulations, ", users[0], ", you've won!", sep="")

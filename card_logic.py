@@ -3,8 +3,10 @@
 import random
 import time
 import logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger(__name__)
+
+random.seed(20)
 
 class Deck:    
     def __init__(self, acesHigh):
@@ -33,11 +35,9 @@ class Deck:
                     i += 1
         return
 
-        
 class Hand:
     def __init__(self, owner):
         self.Deck = []
-        #self.Card = ()
         # Calling .owner on a Hand will return the username as a string
         self.owner = owner
         
@@ -51,14 +51,22 @@ class Hand:
     def flip_three(self):
         return [self.Deck.pop(0), self.Deck.pop(0), self.Deck.pop(0)] #pop the top card three times and return all of the cards.
     
-    def empty(self, cardsToCheckFor, users):
-        loser = "None"
-        if len(self.Deck) < cardsToCheckFor:
-            print(self.owner, "has run out of cards!")
-            users.remove(self)  # In double war, this only remove the user from the current conflict, so it has to be removed again inside double_war
-            loser = self
-        return users, loser
-        
+    def empty(self, losers): #append object to the list if it has lost
+        if len(self.Deck) < 1:
+            print(self, "has run out of cards!")
+            losers.append(self)
+        log.debug("empty returning: losers: %s", losers)
+        return losers
+    
+    def double_check(self, onlyWinners, loserCards): #append object to the list if it has lost as well as appending its cards.
+        if len(self.Deck) < 4:
+            loserCards.extend(self.Deck)
+        else:
+            onlyWinners.append(self)
+            
+        log.debug("double_check returning: onlyWinners: %s loserCards: %s", onlyWinners, loserCards)
+        return onlyWinners, loserCards
+
 class Card:
     def __init__(self, cardList):  #cardList = [[(2,13), 'Computer 1'], [(suit,rank), 'username'], ... ]
         self.cardTuple = cardList[0]
@@ -147,34 +155,41 @@ class Card:
         
         return
     
-#def double_war(winner):
-    
 def double_war(winner, users):
     
     winnerObjs = []
-    for winnerString in winner: #First step: turn the winner string list into a list of user objects with those winner strings
+    for winnerString in winner: # First step: turn the winner string list into a list of user objects with those winner strings
         for userObject in users:
             if winnerString == str(userObject):
                 winnerObjs.append(userObject) 
-    
-    for i in list(winnerObjs): #using list() on a list object will make a copy of the list so the original can be modified with no ill effects. 
-        winnerObjs, loser = i.empty(4, winnerObjs)
-        if loser != "None":
-            users.remove(loser)
-        if len(winnerObjs) == 1: #Only one user left, the winner of the game.
-            return winner, users
-        
     log.debug("winnerObjs: %s", winnerObjs)
+    
+    onlyWinners = []
+    loserCards = []
+    for i in winnerObjs: # who has enough cards to compete?
+        onlyWinners, loserCards = i.double_check(onlyWinners, loserCards)
+    log.debug("onlyWinners: %s", onlyWinners)
+    
+     #from here on our, we use onlyWinners because only those who have enough cards can participate
+    
+    if len(onlyWinners) == 1: # Only one user left, the winner of the round.
+        onlyWinners[0].Deck.extend(loserCards) # Get all the cards from the loser and extend the winner's deck by those cards.
+        users[users.index(onlyWinners[0])]=onlyWinners[0] # write over the winner's deck with the cards from the user he beat
+        log.debug("users: %s", users)
+        return winner, users
         
     cardsDown = []
-    for i in winnerObjs: # get three cards from every user object
-        # this is similar to the card appending statement found in the flip_cards function, but it doesn't turn the individual cards into
-        # card items because it doesn't need to compare or manipulate them. It only needs to append them to the deck of the winner.
-        cardsDown.extend( i.flip_three() ) 
+    for i in onlyWinners: # Get three cards from every user object that has enough cards to compete
+        # this is similar to the card appending statement found in the flip_cards function, but it doesn't turn the cards objects into
+        # card lists with rank and suit because it doesn't need to compare or manipulate them. It only needs to append them to the deck of the winner.
+        cardsDown.extend( i.flip_three() )
         
     log.debug("cardsDown: %s", cardsDown)
     
-    winner, users = flip_cards(winnerObjs) # Run the flip_cards function to get a winner. This winner is a string.
+    winner, onlyWinners = flip_cards(onlyWinners) # Run the flip_cards function to get a winner. This winner is a string.
+    
+    for i in onlyWinners: # The results of the flipcards function need to be written to the individual users, only overwriting the users participating
+        users[users.index(i)]=i
     
     for userObject in users:
         if winner == str(userObject):
@@ -185,32 +200,36 @@ def double_war(winner, users):
     
 def card_compare(cardsUp, users): # cardsUp is a list of the card objects in play.
     ranksList = []
-    for cardObject in cardsUp:
+    
+    for cardObject in cardsUp: #convert our card objects 
         ranksList.append([cardObject.rank,cardObject.owner])
         
     ranksList.sort()
     ranksList.reverse()  # ranksList = [[13, "Computer 2"], [10, "Computer 1], [rank, "username"], ... ]
     log.debug("ranksList: %s", ranksList)
+   
     winner = []
-    if ranksList[0][0] == ranksList[1][0]:
-        print("A tie! Press enter to proceed with WAR! ")
+    
+    if ranksList[0][0] == ranksList[1][0]: # This is the double_war case
+        input("A tie! Press enter to proceed with WAR! ")
         
-        winner.extend([ ranksList[0][1], ranksList[1][1] ]) # Extend the string representation of first two users who tied. (Extend appends a list of items without turning them into another list.)
         log.debug("winner: %s", winner)
-        for i in range(2, len(ranksList)):
+        for i in range(len(ranksList)):
             if ranksList[0][0] == ranksList[i][0]:
-                winner.append(ranksList[i][0]) # Append the string to the winner list so we can develop a list of winners
+                winner.append(ranksList[i][1]) # Append the string to the winner list so we can develop a list of winners
+                log.debug("winner (during loop -if): %s", winner)
             else:
-                log.debug("winner: %s", winner)
+                log.debug("winner (during loop -else): %s", winner)
                 break # The for loop can stop if the cards aren't tying.
+        log.debug("winner (after loop): %s", winner)
         winner, users = double_war(winner, users)  # winner = ["User 1", "User 2", ... , "User n"]
-        
-    else:
+            
+    else: # This is the non-double_war case.
         print(ranksList[0][1], "is the winner!")
         winner = ranksList[0][1]
         
-    for i in users:
-        if str(i) == winner: # this Boolean expression is True when the string held in "winner" is equal to
+    for i in users: # Iterate over all the users and find which one is the winner, then append all the card
+        if str(i) == winner:
             for cardObject in cardsUp: # Make a regular (suit, rank) tuple set from the given data so we can append it.
                 i.Deck.append((cardObject.suit, cardObject.rank))
                 
