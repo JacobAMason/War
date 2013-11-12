@@ -3,13 +3,17 @@
 import random
 import time
 import logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
-random.seed(20)
+random.seed(3)
 
 class Deck:    
     def __init__(self, acesHigh):
+        """
+        Contract: bool ==> NULL
+        Purpose: Initiliazes the deck.
+        """
         self.cards = []
         # The old way to assign cards was to let the user decide if Aces were to be high.
         # I'm keeping the method listed so I can add it back later when I make a configuration menu.
@@ -24,57 +28,94 @@ class Deck:
                 log.debug("Aces are low")
                 for y in range(1, 14):
                     self.cards.append((x, y))
+        return
                     
-    def shuffle(self, userList):
-        i = 0
+    def shuffle(self, users):
+        """
+        Contract: List of User objects ==> NULL
+        Purpose: Shuffles the cards from the main deck to all the Users.
+        """
+        random.shuffle(self.cards)
         while self.cards != []:
-            for user in userList:
+            for i in range(len(users)):
                 if self.cards != []:
-                    poppedCard = self.cards.pop(random.randint(0, 51 - i))
-                    user.Deck.append(poppedCard)
-                    i += 1
+                    users[i].Deck.append(self.cards.pop())
         return
 
-class Hand:
-    def __init__(self, owner):
+class User:
+    def __init__(self, name):
+        """
+        Contract: string ==> NULL
+        Purpose: Initializes a User, turning the string into the user's name.
+        """
         self.Deck = []
-        # Calling .owner on a Hand will return the username as a string
-        self.owner = owner
+        # Calling .name on a User will return the username as a string
+        self.name = name
+        return
         
     def __str__(self):
-        return self.owner
+        """
+        Contract: NULL ==> string
+        Purpose: Returns the name of the user.
+        """
+        return self.name
         
-    def flip_card(self):
-        #returns the card and the owner:  [(1,2), "Player"]
-        return [self.Deck.pop(0), self.owner]
+    def flip_one(self):
+        """
+        Contract: NULL ==> list of the card tuple and the object itself:  [(1,2), <User object>]
+        Purpose: To pop a card from a given User's deck.
+        """
+        #
+        return [self.Deck.pop(0), self]
     
     def flip_three(self):
+        """
+        Contract: NULL ==> list of three card tuples:  [(1,2), (1,3), (4,1)]
+        Purpose: to pop three cards during double 
+        """
         return [self.Deck.pop(0), self.Deck.pop(0), self.Deck.pop(0)] #pop the top card three times and return all of the cards.
     
     def empty(self, losers): #append object to the list if it has lost
+        """
+        Contract: List of losers which are User objects ==> list of User objects
+        Purpose: To determine if a user is out of cards.
+        """
         if len(self.Deck) < 1:
             print(self, "has run out of cards!")
             losers.append(self)
         log.debug("empty returning: losers: %s", losers)
         return losers
     
-    def double_check(self, onlyWinners, loserCards): #append object to the list if it has lost as well as appending its cards.
+    def double_check(self, survivors, loserCards): #append object to the list if it has lost as well as appending its cards.
+        """
+        Contract: List of survivors which are User objects, List of tuples of cards ==> List of survivors which are User objects, List of tuples of cards
+        Purpose: To determine if users are out of cards and then append them to a junk deck that will be added to the winner
+        """      
         if len(self.Deck) < 4:
             loserCards.extend(self.Deck)
         else:
-            onlyWinners.append(self)
+            survivors.append(self)
             
-        log.debug("double_check returning: onlyWinners: %s loserCards: %s", onlyWinners, loserCards)
-        return onlyWinners, loserCards
+        log.debug("double_check returning: survivors: %s loserCards: %s", survivors, loserCards)
+        return survivors, loserCards
 
 class Card:
-    def __init__(self, cardList):  #cardList = [[(2,13), 'Computer 1'], [(suit,rank), 'username'], ... ]
+    def __init__(self, cardList):  #cardList = [[(2,13), <User object>], [(suit,rank), <User object>], ... ]
+        """
+        Contract: list of tuples and User objects ==> NULL
+        Purpose: Initializes a card for use in displaying names and pictures.
+        """
         self.cardTuple = cardList[0]
         self.suit = self.cardTuple[0]
-        self.rank = self.cardTuple[1] 
+        self.rank = self.cardTuple[1]
         self.owner = cardList[1]
+        return
         
     def __str__(self):      
+        """
+        Contract: NULL ==> string
+        Purpose: Print out the name of a card.
+        """
         if self.suit==1:
             suit = "Diamonds"        
         elif self.suit==2:
@@ -116,6 +157,10 @@ class Card:
         return (rank + " of " + suit)        
         
     def draw(self):
+        """
+        Contract: NULL ==> string
+        Purpose: Print the image of the card.
+        """
         if self.suit==1:
             pic3 = "| :/\: |"
             pic4 = "| :\/: |"         
@@ -154,106 +199,4 @@ class Card:
             print(line)
         
         return
-    
-def double_war(winner, users):
-    
-    winnerObjs = []
-    for winnerString in winner: # First step: turn the winner string list into a list of user objects with those winner strings
-        for userObject in users:
-            if winnerString == str(userObject):
-                winnerObjs.append(userObject) 
-    log.debug("winnerObjs: %s", winnerObjs)
-    
-    onlyWinners = []
-    loserCards = []
-    for i in winnerObjs: # who has enough cards to compete?
-        onlyWinners, loserCards = i.double_check(onlyWinners, loserCards)
-    log.debug("onlyWinners: %s", onlyWinners)
-    
-     #from here on our, we use onlyWinners because only those who have enough cards can participate
-    
-    if len(onlyWinners) == 1: # Only one user left, the winner of the round.
-        onlyWinners[0].Deck.extend(loserCards) # Get all the cards from the loser and extend the winner's deck by those cards.
-        users[users.index(onlyWinners[0])]=onlyWinners[0] # write over the winner's deck with the cards from the user he beat
-        log.debug("users: %s", users)
-        return winner, users
-        
-    cardsDown = []
-    for i in onlyWinners: # Get three cards from every user object that has enough cards to compete
-        # this is similar to the card appending statement found in the flip_cards function, but it doesn't turn the cards objects into
-        # card lists with rank and suit because it doesn't need to compare or manipulate them. It only needs to append them to the deck of the winner.
-        cardsDown.extend( i.flip_three() )
-        
-    log.debug("cardsDown: %s", cardsDown)
-    
-    winner, onlyWinners = flip_cards(onlyWinners) # Run the flip_cards function to get a winner. This winner is a string.
-    
-    for i in onlyWinners: # The results of the flipcards function need to be written to the individual users, only overwriting the users participating
-        users[users.index(i)]=i
-    
-    for userObject in users:
-        if winner == str(userObject):
-            userObject.Deck.extend(cardsDown)
-            log.debug("Appended cards to %s", userObject)
-
-    return winner, users #returns the string of the winner
-    
-def card_compare(cardsUp, users): # cardsUp is a list of the card objects in play.
-    ranksList = []
-    
-    for cardObject in cardsUp: #convert our card objects 
-        ranksList.append([cardObject.rank,cardObject.owner])
-        
-    ranksList.sort()
-    ranksList.reverse()  # ranksList = [[13, "Computer 2"], [10, "Computer 1], [rank, "username"], ... ]
-    log.debug("ranksList: %s", ranksList)
-   
-    winner = []
-    
-    if ranksList[0][0] == ranksList[1][0]: # This is the double_war case
-        input("A tie! Press enter to proceed with WAR! ")
-        
-        log.debug("winner: %s", winner)
-        for i in range(len(ranksList)):
-            if ranksList[0][0] == ranksList[i][0]:
-                winner.append(ranksList[i][1]) # Append the string to the winner list so we can develop a list of winners
-                log.debug("winner (during loop -if): %s", winner)
-            else:
-                log.debug("winner (during loop -else): %s", winner)
-                break # The for loop can stop if the cards aren't tying.
-        log.debug("winner (after loop): %s", winner)
-        winner, users = double_war(winner, users)  # winner = ["User 1", "User 2", ... , "User n"]
-            
-    else: # This is the non-double_war case.
-        print(ranksList[0][1], "is the winner!")
-        winner = ranksList[0][1]
-        
-    for i in users: # Iterate over all the users and find which one is the winner, then append all the card
-        if str(i) == winner:
-            for cardObject in cardsUp: # Make a regular (suit, rank) tuple set from the given data so we can append it.
-                i.Deck.append((cardObject.suit, cardObject.rank))
-                
-    return winner, users
-                    
-def flip_cards(users):
-    cardsUp = []
-    for i in range(0, len(users)):
-        log.debug("User: %s", users[i])
-        cardsUp.append( Card(users[i].flip_card()) ) #the flip_card method pulls a card from a given Hand object's deck
-        log.debug("Card: %s", str(cardsUp[i]))
-    
-    for i in range(1, len(users)):
-        print(cardsUp[i], "\t", end="")
-        
-    print()
-    for i in range(1, len(users)):
-        cardsUp[i].draw()
-        
-    print()
-    cardsUp[0].draw()
-    print(cardsUp[0])
-    print()
-    
-    return card_compare(cardsUp, users) #return the winner
-    
     
