@@ -6,8 +6,6 @@ import logging
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
-random.seed(3)
-
 class Deck:    
     def __init__(self, acesHigh):
         """
@@ -100,9 +98,9 @@ class User:
         return survivors, loserCards
 
 class Card:
-    def __init__(self, cardList):  #cardList = [[(2,13), <User object>], [(suit,rank), <User object>], ... ]
+    def __init__(self, cardList):  #cardList = [(suit, rank), <User object>]
         """
-        Contract: list of tuples and User objects ==> NULL
+        Contract: list of a tuple and a User object ==> NULL
         Purpose: Initializes a card for use in displaying names and pictures.
         """
         self.cardTuple = cardList[0]
@@ -154,49 +152,4 @@ class Card:
         else: # when cardTuple == 14 because of high Aces
             rank = "Ace"       
         
-        return (rank + " of " + suit)        
-        
-    def draw(self):
-        """
-        Contract: NULL ==> string
-        Purpose: Print the image of the card.
-        """
-        if self.suit==1:
-            pic3 = "| :/\: |"
-            pic4 = "| :\/: |"         
-        elif self.suit==2:
-            pic3 = "| :(): |"
-            pic4 = "| ()() |"        
-        elif self.suit==3:
-            pic3 = "| (\/) |"
-            pic4 = "| :\/: |"        
-        else:
-            pic3 = "| :/\: |"
-            pic4 = "| (__) |"
-            
-        if self.rank > 1 and self.rank < 10:
-            pic2 = str(self.rank) + "."
-            pic5 = "'" + str(self.rank)
-        elif self.rank == 10:    
-            pic2 = str(self.rank)
-            pic5 = str(self.rank)
-        elif self.rank == 11:
-            pic2 = "J."
-            pic5 = "'J"
-        elif self.rank == 12:
-            pic2 = "Q."
-            pic5 = "'Q"         
-        elif self.rank == 13:
-            pic2 = "K."
-            pic5 = "'K" 
-        else:
-            pic2 = "A."
-            pic5 = "'A"
-    
-        picture = [".------.", "|" + pic2 + "--. |", pic3, pic4, "| '--" + pic5 + "|", "`------'"]
-        
-        for line in picture:
-            print(line)
-        
-        return
-    
+        return (rank + " of " + suit)

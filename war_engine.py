@@ -5,6 +5,7 @@ import random
 import time
 import logging
 from card_logic import *
+from draw_cards import draw_cards
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
@@ -12,11 +13,7 @@ def double_war(winnerList, users):
     """
     Contract: List of winners which are User instances, List of User objects ==> winner which is a User object, List of User objects
     Purpose: To resolve tied cases.
-    """
-    
-    winnerList
-    log.debug("winnerList: %s", winnerList)
-    
+    """    
     survivors = []
     loserCards = []      
 
@@ -24,8 +21,16 @@ def double_war(winnerList, users):
         survivors, loserCards = i.double_check(survivors, loserCards)
     log.debug("survivors: %s", survivors)
     
-     #from here on out, we use survivors because only those who have enough cards can participate
-    
+    #from here on out, we use survivors because only those who have enough cards can participate
+
+    # if no players can actually participate, we're going to give them back their cards.
+    # This won't do anything if the competing players didn't have any cards.
+    if len(survivors) == 0:
+        return [], users
+    else:
+        for user in list(set(winnerList)-set(survivors)):
+            user.Deck = []
+        
     if len(survivors) == 1: # Only one user left, the winner of the round.
         survivors[0].Deck.extend(loserCards) # Get all the cards from the loser(s) and extend the winner's deck by those cards.
         log.debug("users: %s", users)
@@ -43,7 +48,7 @@ def double_war(winnerList, users):
     winner.Deck.extend(cardsDown)
     log.debug("Appended cards to %s", winner)
 
-    return winner, users #returns the string of the winner
+    return winner, users #returns the winner
     
 def card_compare(cardsUp, users): # cardsUp is a list of the card objects in play.
     """
@@ -53,9 +58,9 @@ def card_compare(cardsUp, users): # cardsUp is a list of the card objects in pla
     ranksList = []
     
     for cardObject in cardsUp: #convert our card objects into tuples.
-        ranksList.append([cardObject.rank,cardObject.owner])
+        ranksList.append([cardObject.rank, cardObject.owner, cardObject.suit])
         
-    ranksList.sort(key=lambda x: x[0], reverse=True)  # ranksList = [[13, <User object>], [10, <User object>], [rank, <User object>], ... ]
+    ranksList.sort(key=lambda x: x[0], reverse=True)  # ranksList = [[13, <User object>, 2], [10, <User object>, 1], [rank, <User object>, suit], ... ]
     log.debug("ranksList: %s", ranksList)
    
     winnerList = []
@@ -77,9 +82,14 @@ def card_compare(cardsUp, users): # cardsUp is a list of the card objects in pla
     else: # This is the non-double_war case.
         print(ranksList[0][1], "is the winner!")
         winner = ranksList[0][1]  
-
-    for cardObject in cardsUp: # Make a regular (suit, rank) tuple set from the given data so we can append it.
-        winner.Deck.append((cardObject.suit, cardObject.rank))
+     
+    if winner != []:  
+        for cardObject in cardsUp: # Make a regular (suit, rank) tuple set from the given data so we can append it.
+            winner.Deck.append((cardObject.suit, cardObject.rank))
+    else:
+        for card in ranksList: #This returns the original flipped cards back to the owners.
+            card[1].Deck.append((card[2],card[0]))
+        print("Nobody had enough cards to play double war. Everyone gets their cards back.")
                 
     return winner, users
                     
@@ -94,16 +104,8 @@ def flip_cards(users):
         cardsUp.append( Card(users[i].flip_one()) ) #the flip_one method pulls a card from a given User's deck
         log.debug("Card: %s", str(cardsUp[i]))
     
-    for i in range(1, len(users)):
-        print(cardsUp[i], "\t", end="")
-        
     print()
-    for i in range(1, len(users)):
-        cardsUp[i].draw()
-        
-    print()
-    cardsUp[0].draw()
-    print(cardsUp[0])
+    draw_cards(cardsUp)
     print()
     
     return card_compare(cardsUp, users) #return the winner and the users
