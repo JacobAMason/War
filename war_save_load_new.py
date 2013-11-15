@@ -31,8 +31,8 @@ def new_game():
         userNameList.append(input("Please enter your name: "))
         
     PCnum = int(input("How many Computer opponents would you like to compete against? "))
-    while PCnum <=0:
-        print("You must compete against at least one Computer.")
+    while PCnum <=0 or PCnum > 50:
+        print("You must compete against at least 1 Computer and less than 51.")
         PCnum = int(input("How many Computer opponents would you like to compete against? "))
         
     for i in range(0, PCnum):

@@ -1,7 +1,6 @@
 # card_logic.py
 
 import random
-import time
 import logging
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)

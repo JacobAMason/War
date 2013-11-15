@@ -1,18 +1,19 @@
 from card_logic import *
 from war_engine import *
 from war_save_load_new import *
+import war_gui
+gui = war_gui.gui()
 import logging
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
-loadFile = input("Would you like to load a file? (y/n) ")
-if loadFile[0].lower()=="y":
-    userName = input("What is your name? ")
-    users = load_game(userName)
-    if users == []:
-        users = new_game()
-else:
-    users = new_game()
+#gui.welcome()
+
+users = gui.get_users()
+
+print()
+print(' To save your game, type "save" at any time.')
+print()
 
 # Gameplay starts here and continues as long as there is more than one player.
 while(len(users) > 1):
@@ -26,7 +27,7 @@ while(len(users) > 1):
     
     command = input("\nPress the enter key to flip. ")
     
-    if command == "s":
+    if command.startswith("s"):
         save_game(users)
     else:
         winner, users = flip_cards(users) #flip some cards. Winner is never used here.
@@ -50,6 +51,6 @@ print()
 log.debug("losers: %s", losers)
 log.debug("users[0]: %s", users[0])
 if users[0] in losers:
-    print("Sorry, ", users[0], ", you've lost.", sep="")
+    print("Sorry, ", users[0], ", you've lost.")
 else:
-    print("Congratulations, ", users[0], ", you've won!", sep="")
+    print("Congratulations, ", users[0], ", you've won!")
