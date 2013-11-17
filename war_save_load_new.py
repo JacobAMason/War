@@ -47,3 +47,15 @@ def new_game():
     BigDeck.shuffle(users) #shuffle the deck and deal to all players
     
     return users
+
+def get_users():
+    loadFile = input("Would you like to load a file? (y/n) ")
+    if loadFile[0].lower()=="y":
+        userName = input("What is your name? ")
+        users = load_game(userName)
+        if users == []:
+            users = new_game()
+    else:
+        users = new_game()  
+        
+    return users 

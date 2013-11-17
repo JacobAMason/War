@@ -9,6 +9,8 @@ from draw_cards import draw_cards
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
+outcome = False
+
 def double_war(winnerList, users):
     """
     Contract: List of winners which are User instances, List of User objects ==> winner which is a User object, List of User objects
@@ -55,6 +57,9 @@ def card_compare(cardsUp, users): # cardsUp is a list of the card objects in pla
     Contract: List of Card objects, List of User objects ==> winner List, List of User objects
     Purpose: To compare cards and assign them to the winner.
     """
+    
+    global outcome
+    
     ranksList = []
     
     for cardObject in cardsUp: #convert our card objects into tuples.
@@ -66,7 +71,8 @@ def card_compare(cardsUp, users): # cardsUp is a list of the card objects in pla
     winnerList = []
     
     if ranksList[0][0] == ranksList[1][0]: # This is the double_war case
-        input("A tie! Press enter to proceed with WAR! ")
+        if not outcome:
+            input("A tie! Press enter to proceed with WAR! ")
         
         log.debug("winnerList: %s", winnerList)
         for i in range(len(ranksList)):

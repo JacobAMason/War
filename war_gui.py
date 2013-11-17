@@ -2,7 +2,6 @@
 
 import tkinter
 import tkinter.messagebox
-import war_save_load_new as wsln
 import time
 
 class gui:
@@ -31,19 +30,7 @@ class gui:
         
         self.buttons.pack(side="bottom")
         """
-        #tkinter.mainloop() #this is like a spin
-        
-    def get_users(self):
-        loadFile = input("Would you like to load a file? (y/n) ")
-        if loadFile[0].lower()=="y":
-            userName = input("What is your name? ")
-            users = wsln.load_game(userName)
-            if users == []:
-                users = wsln.new_game()
-        else:
-            users = wsln.new_game()  
-            
-        return users   
+        #tkinter.mainloop() #this is like a spin  
               
     def message(self, message):
         tkinter.messagebox.showinfo("War", message)
