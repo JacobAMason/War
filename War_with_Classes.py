@@ -6,6 +6,10 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
 def game():
+    """
+    Contract: NULL ==> NULL
+    Purpose: This servers as a container for every game of War that it played.
+    """
     outcome = False
    
     users = get_users()

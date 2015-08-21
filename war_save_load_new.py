@@ -4,14 +4,23 @@ from card_logic import User
 import pickle
 
 def save_game(users):
+    """
+    Contract: List of User objects ==> NUL
+    Purpose: This saves the list of users to a file that shares the name of the initial user.
+    """
     userName = str(users[0])
     outFile = open((userName + '.dat'), "wb")
 
     pickle.dump(users, outFile)
         
     outFile.close()
+    return
     
 def load_game(userName):
+    """
+    Contract: string ==> List of User objects OR Blank list
+    Purpose: Loads a user's data from the disk.
+    """
     try:
         inFile = open((userName + '.dat'), 'rb')
         users = pickle.load(inFile)
@@ -25,6 +34,10 @@ def load_game(userName):
         return []
     
 def new_game():
+    """
+    Contract: NULL ==> List of User Objects
+    Purpose: This sets up the users list for a new game based on a given name and a number of computer players.
+    """
     BigDeck = Deck(True) #initialize deck. True means Aces are high
     userNameList = []
     while userNameList == []: 
@@ -49,6 +62,10 @@ def new_game():
     return users
 
 def get_users():
+    """
+    Contract: NULL ==> list of User objects
+    Purpose: This function asks the user if he wants to load a savegame and then either loads or creates a new game.
+    """
     loadFile = input("Would you like to load a file? (y/n) ")
     if loadFile[0].lower()=="y":
         userName = input("What is your name? ")

@@ -3,34 +3,43 @@
 import tkinter
 import tkinter.messagebox
 import time
+from draw_cards import draw_cards
 
-class gui:
+class Gui:
     
     def __init__(self):
         self.main_window = tkinter.Tk()
-        self.main_window.withdraw()
-        """
+        
         self.textBody = tkinter.Frame(self.main_window)
         self.buttons = tkinter.Frame(self.main_window)
         
-        self.label1 = tkinter.Label(self.textBody, text="Hello World")
-        self.label2 = tkinter.Label(self.textBody, text="This is my GUI program.")
+        self.label1 = tkinter.Label(self.textBody, text="Let's play war!")
+        self.entry_prompt1 = tkinter.Label(self.textBody, text="What's your name? ")
+        self.nameObj = tkinter.StringVar()
+        self.nameTemp = ""
+        self.entry1 = tkinter.Entry(self.textBody, width=10, textvariable=self.nameTemp)
+        self.nameObj.set(self.nameTemp)
+        self.name = self.nameObj.get()
+        self.label2 = tkinter(self.textBody, text = self.name)
         
-        self.label1.pack(side="left")
-        self.label2.pack(side="right")
+        
+        self.label1.pack(side="top")
+        self.entry_prompt1.pack(side="left")
+        self.entry1.pack(side="right")
+        self.label2.pack(side="bottom")
         
         self.textBody.pack()
         
-        self.button1 = tkinter.Button(self.buttons, text="Click here", command=self.do_something)
+        self.button1 = tkinter.Button(self.buttons, text="Next", command=self.display_name)
         
-        self.exitButton = tkinter.Button(self.buttons, text="Exit", command=self.main_window.destroy)
-        
-        self.button1.pack(side="left")
-        self.exitButton.pack(side="right")
+        self.button1.pack(side="bottom")
         
         self.buttons.pack(side="bottom")
-        """
-        #tkinter.mainloop() #this is like a spin  
+        tkinter.mainloop() #this is like a spin  
+        
+    def display_name(self):
+        pass
+        
               
     def message(self, message):
         tkinter.messagebox.showinfo("War", message)
